@@ -5645,7 +5645,7 @@ async function cmdStartHandler(ctx) {
  🧠 Logic: 12+ Pro Strategies
  🤖 AI Mode: Smart Auto-Trading
  ▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰
-https://www.777bigwingame.co/#/register?invitationCode=84318565611
+https://www.6win999.com/#/register?invitationCode=386831122519
 ▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰
 
 ${loggedIn ? '⚡️ System Ready! Choose an option 👇' : '🔐 Please Login to connect system 👇'}`;
@@ -6829,7 +6829,7 @@ if (!freeModeEnabled && !allowedsixlotteryIds.has(gameUserId)) {
   await sendMessageWithRetry(ctx, 
     `${EMOJI.ERROR} ${STYLE.BOLD('သင်၏ ID အား အတည်ပြုမထားရသေးပါ .')}\n\n` +
     `${EMOJI.INFO} Admin အား ခွင့်ပြုချက်တောင်းပါ .\n` +
-    `${EMOJI.INFO} ခွင့်ပြုချက်တောင်းရန် @kiki20251 သို့ ID ပို့ပေးပါ:\n` +
+    `${EMOJI.INFO} ခွင့်ပြုချက်တောင်းရန် @Zen_Offical သို့ ID ပို့ပေးပါ:\n` +
     `${STYLE.ITEM(`သင်၏ ID: ${STYLE.CODE(gameUserId.toString())}`)}`,
     makeMainKeyboard(false, isAdmin)
   );
