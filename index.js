@@ -7133,8 +7133,8 @@ async function showUserStats(ctx, userId) {
 // ⚙️ Config
 const BASE_URL = PLATFORMS["CKLOTTERY"].baseUrl;
 // ဒီလို ပြောင်းပါ (အောက်ဆုံးအနီး Config အပိုင်း)
-const BOT_TOKEN = process.env.BOT_TOKEN || "8707027344:AAFOGuDVUpKgGaCmOruhyh1Z5plgeclsa00";
-const ADMIN_ID = parseInt(process.env.ADMIN_ID || "7308292609");
+const BOT_TOKEN = process.env.BOT_TOKEN || "8747393674:AAHKPjJ3qRi7ET3_kA3gyUj2PUUWL9n0drY";
+const ADMIN_ID = parseInt(process.env.ADMIN_ID || "8877888465");
 const IGNORE_SSL = true;
 const WIN_LOSE_CHECK_INTERVAL = 2;
 const MAX_RESULT_WAIT_TIME = 60;
