@@ -6829,12 +6829,12 @@ if (!freeModeEnabled && !allowedsixlotteryIds.has(gameUserId)) {
   await sendMessageWithRetry(ctx, 
     `${EMOJI.ERROR} ${STYLE.BOLD('သင်၏ ID အား အတည်ပြုမထားရသေးပါ .')}\n\n` +
     `${EMOJI.INFO} Admin အား ခွင့်ပြုချက်တောင်းပါ .\n` +
-    `${EMOJI.INFO} ခွင့်ပြုချက်တောင်းရန် @Zen_Offical သို့ ID ပို့ပေးပါ:\n` +
+    `${EMOJI.INFO} ခွင့်ပြုချက်တောင်းရန် @Zen\\_Offical သို့ ID ပို့ပေးပါ:\n` +
     `${STYLE.ITEM(`သင်၏ ID: ${STYLE.CODE(gameUserId.toString())}`)}`,
     makeMainKeyboard(false, isAdmin)
   );
   return;
-}
+}/
       
       userSessions[userId] = session;
       userGameInfo[userId] = userInfo;
