@@ -6820,24 +6820,22 @@ if (userState[userId]?.state === "PLATFORM_SELECTED" && lines.length >= 2) {
   
   const { response: res, session } = await loginRequest(phone, password, platform.baseUrl);
 
-if (session) {
-  const userInfo = await getUserInfo(session, userId);
-  if (userInfo && userInfo.user_id) {
-    const gameUserId = userInfo.user_id;
+  if (session) {
+    const userInfo = await getUserInfo(session, userId);
+    if (userInfo && userInfo.user_id) {
+      const gameUserId = userInfo.user_id;
 
-    if (!freeModeEnabled && !allowedsixlotteryIds.has(gameUserId)) {
-      await sendMessageWithRetry(ctx, 
-        `${EMOJI.ERROR} ${STYLE.BOLD('သင်၏ ID အား အတည်ပြုမထားရသေးပါ .')}\n\n` +
-        `${EMOJI.INFO} Admin အား ခွင့်ပြုချက်တောင်းပါ .\n` +
-        `${EMOJI.INFO} ခွင့်ပြုချက်တောင်းရန် @Zen\\_Offical သို့ ID ပို့ပေးပါ:\n` +
-        `${STYLE.ITEM(`သင်၏ ID: ${STYLE.CODE(gameUserId.toString())}`)}`,
-        makeMainKeyboard(false, isAdmin)
-      );
-      return;
-    }
-  }
-}
-      
+      if (!freeModeEnabled && !allowedsixlotteryIds.has(gameUserId)) {
+        await sendMessageWithRetry(ctx, 
+          `${EMOJI.ERROR} ${STYLE.BOLD('သင်၏ ID အား အတည်ပြုမထားရသေးပါ .')}\n\n` +
+          `${EMOJI.INFO} Admin အား ခွင့်ပြုချက်တောင်းပါ .\n` +
+          `${EMOJI.INFO} ခွင့်ပြုချက်တောင်းရန် @Zen\\_Offical သို့ ID ပို့ပေးပါ:\n` +
+          `${STYLE.ITEM(`သင်၏ ID: ${STYLE.CODE(gameUserId.toString())}`)}`,
+          makeMainKeyboard(false, isAdmin)
+        );
+        return;
+      }
+
       userSessions[userId] = session;
       userGameInfo[userId] = userInfo;
       userTemp[userId] = { password, platform: platformKey };
