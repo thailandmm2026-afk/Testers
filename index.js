@@ -5334,7 +5334,7 @@ let balanceText = "";
 
 function makePlatformKeyboard() {
   return Markup.keyboard([
-    [`${PLATFORMS["777BIGWIN"].color} ${PLATFORMS["777BIGWIN"].name}`],
+    [`${PLATFORMS["6LOTTERY"].color} ${PLATFORMS["6LOTTERY"].name}`],
     [`${EMOJI.BACK} Back`]
   ]).resize().oneTime(false);
 }
