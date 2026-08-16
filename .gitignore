@@ -1,0 +1,7 @@
+node_modules/
+.env
+user_settings.json
+users_6lottery.json
+free_mode.json
+*.png
+.DS_Store
