@@ -3,7 +3,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const https = require('https');
 const axios = require('axios');
-const { createCanvas, loadImage } = require('canvas');
+//const { createCanvas, loadImage } = require('canvas');
 const path = require('path');
 
 // Login config
