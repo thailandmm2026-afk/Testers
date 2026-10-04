@@ -5334,6 +5334,8 @@ let balanceText = "";
 
 function makePlatformKeyboard() {
   return Markup.keyboard([
+    [`${PLATFORMS["777BIGWIN"].color} ${PLATFORMS["777BIGWIN"].name}`],
+    [`${PLATFORMS["CKLOTTERY"].color} ${PLATFORMS["CKLOTTERY"].name}`],
     [`${PLATFORMS["6LOTTERY"].color} ${PLATFORMS["6LOTTERY"].name}`],
     [`${EMOJI.BACK} Back`]
   ]).resize().oneTime(false);
@@ -5645,7 +5647,7 @@ async function cmdStartHandler(ctx) {
  🧠 Logic: 12+ Pro Strategies
  🤖 AI Mode: Smart Auto-Trading
  ▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰
-https://www.6win999.com/#/register?invitationCode=386831122519
+https://www.777bigwingame.co/#/register?invitationCode=84318565611
 ▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰
 
 ${loggedIn ? '⚡️ System Ready! Choose an option 👇' : '🔐 Please Login to connect system 👇'}`;
@@ -6819,23 +6821,23 @@ if (userState[userId]?.state === "PLATFORM_SELECTED" && lines.length >= 2) {
   userPlatforms[userId] = platformKey;
   
   const { response: res, session } = await loginRequest(phone, password, platform.baseUrl);
-
+  
   if (session) {
     const userInfo = await getUserInfo(session, userId);
     if (userInfo && userInfo.user_id) {
       const gameUserId = userInfo.user_id;
-
-      if (!freeModeEnabled && !allowedsixlotteryIds.has(gameUserId)) {
-        await sendMessageWithRetry(ctx, 
-          `${EMOJI.ERROR} ${STYLE.BOLD('သင်၏ ID အား အတည်ပြုမထားရသေးပါ .')}\n\n` +
-          `${EMOJI.INFO} Admin အား ခွင့်ပြုချက်တောင်းပါ .\n` +
-          `${EMOJI.INFO} ခွင့်ပြုချက်တောင်းရန် @Zen\\_Offical သို့ ID ပို့ပေးပါ:\n` +
-          `${STYLE.ITEM(`သင်၏ ID: ${STYLE.CODE(gameUserId.toString())}`)}`,
-          makeMainKeyboard(false, isAdmin)
-        );
-        return;
-      }
-
+      
+if (!freeModeEnabled && !allowedsixlotteryIds.has(gameUserId)) {
+  await sendMessageWithRetry(ctx, 
+    `${EMOJI.ERROR} ${STYLE.BOLD('သင်၏ ID အား အတည်ပြုမထားရသေးပါ .')}\n\n` +
+    `${EMOJI.INFO} Admin အား ခွင့်ပြုချက်တောင်းပါ .\n` +
+    `${EMOJI.INFO} ခွင့်ပြုချက်တောင်းရန် @kiki20251 သို့ ID ပို့ပေးပါ:\n` +
+    `${STYLE.ITEM(`သင်၏ ID: ${STYLE.CODE(gameUserId.toString())}`)}`,
+    makeMainKeyboard(false, isAdmin)
+  );
+  return;
+}
+      
       userSessions[userId] = session;
       userGameInfo[userId] = userInfo;
       userTemp[userId] = { password, platform: platformKey };
@@ -7133,8 +7135,8 @@ async function showUserStats(ctx, userId) {
 // ⚙️ Config
 const BASE_URL = PLATFORMS["CKLOTTERY"].baseUrl;
 // ဒီလို ပြောင်းပါ (အောက်ဆုံးအနီး Config အပိုင်း)
-const BOT_TOKEN = process.env.BOT_TOKEN || "8747393674:AAHKPjJ3qRi7ET3_kA3gyUj2PUUWL9n0drY";
-const ADMIN_ID = parseInt(process.env.ADMIN_ID || "8877888465");
+const BOT_TOKEN = "8533662019:AAEpv-KiTGbebCf0RyffqVAIm3qE-LklcRk";
+const ADMIN_ID = "7308292609"
 const IGNORE_SSL = true;
 const WIN_LOSE_CHECK_INTERVAL = 2;
 const MAX_RESULT_WAIT_TIME = 60;
