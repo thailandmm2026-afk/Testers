@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const https = require('https');
 const axios = require('axios');
+const { login7s } = require('./lib/login7s');
 //const { createCanvas, loadImage } = require('canvas');
 const path = require('path');
 
@@ -51,6 +52,11 @@ const PLATFORMS = {
     name: "CKLOTTERY",
     baseUrl: "https://ckygjf6r.com/api/webapi/",
     color: "🔵"
+  },
+  "7SCROWN": {
+    name: "7SCROWN",
+    baseUrl: "https://www.7scrown48.xyz/",
+    color: "🟣"
   }
 };
 
@@ -658,6 +664,32 @@ function generateSignature(data) {
 }
 
 async function loginRequest(phone, password, baseUrl = PLATFORMS["CKLOTTERY"].baseUrl) {
+  // ===== 7SCROWN LOGIN =====
+  if (baseUrl.includes('7scrown') || baseUrl.includes('78840182')) {
+    try {
+      const result = await login7s(String(phone).replace(/^95/, ''), password);
+      const token = result.token;
+      const session = {
+        platform: "7SCROWN",
+        token,
+        userName: result.userName,
+        id: result.id,
+        post: async (endpoint, data) => {
+          // Adapter for compatibility - 7S uses different APIs
+          return { data: { code: 0, data: {} } };
+        }
+      };
+      return {
+        response: { code: 0, data: { token, tokenHeader: "", userId: result.id, userName: result.userName } },
+        session
+      };
+    } catch (error) {
+      logging.error(`7SCROWN Login error: ${error.message}`);
+      return { response: { error: error.message, msg: error.message }, session: null };
+    }
+  }
+  // ===== END 7SCROWN =====
+
   if (!baseUrl.endsWith('/')) baseUrl += '/';
 
   const loginData = {
@@ -726,7 +758,92 @@ async function loginRequest(phone, password, baseUrl = PLATFORMS["CKLOTTERY"].ba
   }
 }
 
+
+// ===== 7SCROWN API HELPERS =====
+const S7_BASE = "https://www.7scrown48.xyz";
+const S7_GAME_ID = 46402;
+const S7_MERCHANT = "7smmkf5";
+
+function s7Headers(token) {
+  return {
+    accept: "application/json, text/plain, */*",
+    authorization: token,
+    language: "EN",
+    merchant: S7_MERCHANT,
+    "content-type": "application/json;charset=UTF-8",
+    "User-Agent": "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/137.0.0.0 Mobile Safari/537.36",
+    Referer: `${S7_BASE}/m/lotto-thai-h5/b1/trad/games/${S7_GAME_ID}`
+  };
+}
+
+async function getBalance7s(token) {
+  try {
+    const r = await axios.get(`${S7_BASE}/wps/v2/wallets/balance?typeId=0`, { headers: s7Headers(token), timeout: 10000 });
+    if (r.data && r.data.success) return parseFloat(r.data.value?.sumBalance || 0);
+    return null;
+  } catch (e) {
+    logging.error(`7S balance error: ${e.message}`);
+    return null;
+  }
+}
+
+async function fetchHistory7s(token) {
+  try {
+    const r = await axios.get(`${S7_BASE}/m/lotto-thai-h5/lgw/draw/${S7_GAME_ID}?page=0&size=30`, { headers: s7Headers(token), timeout: 10000 });
+    const content = r.data?.content || [];
+    return content.map(item => ({
+      issueNumber: String(item.numero),
+      number: String(item.winNo),
+      issuenumber: String(item.numero)
+    }));
+  } catch (e) {
+    logging.error(`7S history error: ${e.message}`);
+    return [];
+  }
+}
+
+async function placeBet7s(token, side, amount, period) {
+  const sideCode = (side === "BIG" || side === "B" || side === 13 || side === "13") ? "0" : "1";
+  const slip = `${sideCode}~1~3062~1~0~1~~${amount}`;
+  const body = [{
+    chase: false, quickChase: false, orderType: 1, abandoning: false, winningStop: false,
+    prizeModeId: 5, betCartAmountSum: Number(amount), gameId: S7_GAME_ID, device: "MTH",
+    currentNumero: String(period), bettingSlipString: slip, bettingApproach: "1", bettingSlip: null
+  }];
+  try {
+    const r = await axios.post(`${S7_BASE}/m/lotto-thai-h5/lgw/orders/betting/batch`, body, { headers: s7Headers(token), timeout: 15000 });
+    const data = r.data;
+    if (Array.isArray(data) && data[0]?.bettingStatus === "SUCCESS") {
+      return { code: 0, data: data[0], msg: "success" };
+    }
+    return { code: -1, data, msg: typeof data === "string" ? data : JSON.stringify(data) };
+  } catch (e) {
+    return { code: -1, error: e.message, msg: e.message };
+  }
+}
+// ===== END 7SCROWN HELPERS =====
+
 async function getUserInfo(session, userId) {
+  // ===== 7SCROWN =====
+  if (session && session.platform === "7SCROWN") {
+    const info = {
+      user_id: session.id || userId,
+      username: session.userName || String(session.id),
+      nickname: session.userName || "7S User",
+      balance: 0,
+      photo: "",
+      login_date: new Date().toISOString(),
+      withdraw_count: 0,
+      is_allow_withdraw: true
+    };
+    try {
+      const bal = await getBalance7s(session.token);
+      if (bal !== null) info.balance = bal;
+    } catch (e) {}
+    userGameInfo[userId] = info;
+    return info;
+  }
+  // ===== END 7SCROWN =====
   const body = {
     "language": 7,
     "random": "4fc9f8f8d6764a5f934d4c6a468644e0"
@@ -759,6 +876,11 @@ async function getUserInfo(session, userId) {
 }
 
 async function getBalance(session, userId) {
+  // ===== 7SCROWN =====
+  if (session && session.platform === "7SCROWN") {
+    return await getBalance7s(session.token);
+  }
+  // ===== END =====
   const platformKey = userSettings[userId]?.platform || "CKLOTTERY";
   const platform = PLATFORMS[platformKey];
   const body = {
@@ -798,6 +920,30 @@ async function getBalance(session, userId) {
 }
 
 async function getGameIssueRequest(session, gameType) {
+  // ===== 7SCROWN =====
+  if (session && session.platform === "7SCROWN") {
+    try {
+      const list = await fetchHistory7s(session.token);
+      if (!list.length) return { code: -1, msg: "no history" };
+      const latest = list[0].issueNumber;
+      const next = String(parseInt(latest) + 1);
+      return {
+        code: 0,
+        data: {
+          issueNumber: next,
+          issuenumber: next,
+          endTime: Date.now() + 60000,
+          serviceTime: Date.now(),
+          startTime: Date.now(),
+          // compatibility
+          data: { issueNumber: next }
+        }
+      };
+    } catch (e) {
+      return { code: -1, msg: e.message };
+    }
+  }
+  // ===== END =====
   let typeId, endpoint;
   
   if (gameType === "TRX") {
@@ -860,6 +1006,18 @@ async function getGameIssueRequest(session, gameType) {
 }
 
 async function placeBetRequest(session, issueNumber, selectType, unitAmount, betCount, gameType, userId) {
+  // ===== 7SCROWN BET =====
+  if (session && session.platform === "7SCROWN") {
+    const amount = Number(unitAmount) * Number(betCount || 1);
+    // selectType: 13=BIG, 14=SMALL (from original bot) or B/S
+    let side = "SMALL";
+    if (selectType === 13 || selectType === "13" || selectType === "B" || selectType === "BIG") side = "BIG";
+    if (selectType === 14 || selectType === "14" || selectType === "S" || selectType === "SMALL") side = "SMALL";
+    const res = await placeBet7s(session.token, side, amount, issueNumber);
+    logging.info(`7S Bet: ${side} ${amount} period=${issueNumber} code=${res.code}`);
+    return res;
+  }
+  // ===== END 7SCROWN =====
   let typeId, endpoint;
   
   if (gameType === "TRX") {
@@ -925,6 +1083,19 @@ async function placeBetRequest(session, issueNumber, selectType, unitAmount, bet
 }
 
 async function getWingoGameResults(session, gameType = "WINGO") {
+  // ===== 7SCROWN =====
+  if (session && session.platform === "7SCROWN") {
+    const list = await fetchHistory7s(session.token);
+    // Map to original format: data.list[].issueNumber, number
+    const mapped = list.map(x => ({
+      issueNumber: x.issueNumber,
+      issuenumber: x.issueNumber,
+      number: x.number,
+      Number: x.number
+    }));
+    return { code: 0, data: { list: mapped } };
+  }
+  // ===== END =====
   let typeId;
   let endpoint = "GetNoaverageEmerdList"; // Default endpoint
   
@@ -5337,6 +5508,7 @@ function makePlatformKeyboard() {
     [`${PLATFORMS["777BIGWIN"].color} ${PLATFORMS["777BIGWIN"].name}`],
     [`${PLATFORMS["CKLOTTERY"].color} ${PLATFORMS["CKLOTTERY"].name}`],
     [`${PLATFORMS["6LOTTERY"].color} ${PLATFORMS["6LOTTERY"].name}`],
+    [`${PLATFORMS["7SCROWN"].color} ${PLATFORMS["7SCROWN"].name}`],
     [`${EMOJI.BACK} Back`]
   ]).resize().oneTime(false);
 }
@@ -7135,8 +7307,8 @@ async function showUserStats(ctx, userId) {
 // ⚙️ Config
 const BASE_URL = PLATFORMS["CKLOTTERY"].baseUrl;
 // ဒီလို ပြောင်းပါ (အောက်ဆုံးအနီး Config အပိုင်း)
-const BOT_TOKEN = "8533662019:AAEpv-KiTGbebCf0RyffqVAIm3qE-LklcRk";
-const ADMIN_ID = "7308292609"
+const BOT_TOKEN = process.env.BOT_TOKEN || "8533662019:AAEpv-KiTGbebCf0RyffqVAIm3qE-LklcRk";
+const ADMIN_ID = parseInt(process.env.ADMIN_ID || "7308292609");
 const IGNORE_SSL = true;
 const WIN_LOSE_CHECK_INTERVAL = 2;
 const MAX_RESULT_WAIT_TIME = 60;
